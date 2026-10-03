@@ -4,6 +4,16 @@ import { formatTime } from "../services/dateService.js";
 import { useState } from "react";
 export default function Notifications({ data, mutate, notify, select }) {
   const [confirm, setConfirm] = useState(false);
+  const perform = async (fn, message) => {
+    try {
+      await mutate(fn);
+      if (message) notify(message);
+      return true;
+    } catch (e) {
+      notify(e.message, "error");
+      return false;
+    }
+  };
   return (
     <>
       <PageTitle
@@ -15,8 +25,10 @@ export default function Notifications({ data, mutate, notify, select }) {
           icon="check"
           disabled={!data.notifications.some((x) => !x.read)}
           onClick={() => {
-            mutate((d) => notificationService.markAllRead(d));
-            notify("تم تحديد جميع التنبيهات كمقروءة");
+            perform(
+              (d) => notificationService.markAllRead(d),
+              "تم تحديد جميع التنبيهات كمقروءة",
+            );
           }}
         >
           قراءة الكل
@@ -56,7 +68,7 @@ export default function Notifications({ data, mutate, notify, select }) {
                     className="icon-btn"
                     aria-label={`تحديد كمقروء: ${n.message}`}
                     onClick={() =>
-                      mutate((d) => notificationService.markRead(d, n.id))
+                      perform((d) => notificationService.markRead(d, n.id))
                     }
                   >
                     <Icon name="check" />
@@ -66,7 +78,7 @@ export default function Notifications({ data, mutate, notify, select }) {
                   className="icon-btn"
                   aria-label={`مسح التنبيه: ${n.message}`}
                   onClick={() =>
-                    mutate((d) => notificationService.remove(d, n.id))
+                    perform((d) => notificationService.remove(d, n.id))
                   }
                 >
                   <Icon name="trash" />
@@ -88,10 +100,14 @@ export default function Notifications({ data, mutate, notify, select }) {
           label="مسح الكل"
           danger
           onClose={() => setConfirm(false)}
-          onConfirm={() => {
-            mutate((d) => notificationService.clear(d));
-            setConfirm(false);
-            notify("تم مسح جميع التنبيهات");
+          onConfirm={async () => {
+            if (
+              await perform(
+                (d) => notificationService.clear(d),
+                "تم مسح جميع التنبيهات",
+              )
+            )
+              setConfirm(false);
           }}
         />
       )}

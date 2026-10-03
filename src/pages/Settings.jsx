@@ -47,7 +47,7 @@ export default function Settings({ data, mutate, notify, restore }) {
       <PageTitle
         eyebrow="اضبط النظام على طريقتك"
         title="الإعدادات"
-        description="إعدادات محلية لهذه النسخة التجريبية، دون أي بيانات اتصال بالراوتر."
+        description="إعدادات هذه النسخة التجريبية، دون أي بيانات اتصال بالراوتر."
       />
       <section className="panel settings-panel">
         <div className="panel-heading">
@@ -55,7 +55,7 @@ export default function Settings({ data, mutate, notify, restore }) {
           <Icon name="settings" />
         </div>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             try {
               const settings = {
@@ -64,7 +64,7 @@ export default function Settings({ data, mutate, notify, restore }) {
                 warningDays: Number(form.warningDays),
               };
               validateSettings(settings);
-              mutate((d) => {
+              await mutate((d) => {
                 d.settings = settings;
                 activityService.record(
                   d,
@@ -211,9 +211,9 @@ export default function Settings({ data, mutate, notify, restore }) {
           message={`تحتوي النسخة على ${pending.subscribers.length} مشترك و${pending.packages.length} باقة. ستستبدل البيانات الحالية. ننصح بتصديرها قبل المتابعة.`}
           label="استعادة واستبدال البيانات"
           onClose={() => setPending(null)}
-          onConfirm={() => {
+          onConfirm={async () => {
             try {
-              restore(pending);
+              await restore(pending);
               setForm({ ...pending.settings });
               setPending(null);
               notify("تمت استعادة النسخة الاحتياطية");

@@ -24,6 +24,7 @@ jobs:
             sleep 1
           done
           npm run test:e2e
+          npm run test:cloud
       - name: Production PWA tests
         run: |
           npm run preview > /tmp/isp-preview.log 2>&1 &

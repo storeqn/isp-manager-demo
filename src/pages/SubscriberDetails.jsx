@@ -45,9 +45,9 @@ export default function SubscriberDetails({
       />
     );
   const p = data.packages.find((p) => p.id === s.packageId);
-  const perform = (fn, message, close = true) => {
+  const perform = async (fn, message, close = true) => {
     try {
-      mutate(fn);
+      await mutate(fn);
       notify(message);
       if (close) setAction("");
       return true;
@@ -217,13 +217,13 @@ export default function SubscriberDetails({
       {action === "delete" && (
         <Confirm
           title="حذف المشترك؟"
-          message={`سيتم حذف ${s.name} من البيانات المحلية. يبقى سجل عملياته محفوظاً. لا يمكن التراجع بدون نسخة احتياطية.`}
+          message={`سيتم حذف ${s.name} من مساحة العمل الحالية. يبقى سجل عملياته محفوظاً. لا يمكن التراجع بدون نسخة احتياطية.`}
           danger
           label="نعم، حذف المشترك"
           onClose={() => setAction("")}
-          onConfirm={() => {
+          onConfirm={async () => {
             if (
-              perform(
+              await perform(
                 (d) => subscriberService.remove(d, s.id),
                 "تم حذف المشترك",
               )
@@ -244,7 +244,7 @@ export default function SubscriberDetails({
           onClose={() => setAction("")}
         >
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               perform(
                 (d) =>

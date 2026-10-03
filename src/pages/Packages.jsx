@@ -101,10 +101,10 @@ export default function Packages({ data, mutate, notify }) {
         >
           <form
             noValidate
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               try {
-                mutate((d) => packageService.save(d, form));
+                await mutate((d) => packageService.save(d, form));
                 notify("تم حفظ الباقة بنجاح");
                 setForm(null);
               } catch (e) {
@@ -163,9 +163,9 @@ export default function Packages({ data, mutate, notify }) {
           danger
           label="حذف الباقة"
           onClose={() => setRemove(null)}
-          onConfirm={() => {
+          onConfirm={async () => {
             try {
-              mutate((d) => packageService.remove(d, remove.id));
+              await mutate((d) => packageService.remove(d, remove.id));
               notify("تم حذف الباقة");
               setRemove(null);
             } catch (e) {

@@ -16,13 +16,16 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 try {
   await page.goto(url);
+  await page.locator(".sidebar").waitFor({ state: "attached" });
   await page.locator("main h1").waitFor();
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   await page.reload();
+  await page.locator(".sidebar").waitFor({ state: "attached" });
   await page.locator("main h1").waitFor();
   for (const route of ["packages", "settings", "reports"]) {
     await page.goto(`${url}/#${route}`);
+    await page.locator(".sidebar").waitFor({ state: "attached" });
     await page.locator("main h1").waitFor();
   }
   const before = await page.evaluate(() =>
@@ -49,6 +52,14 @@ try {
     return { scope: r.scope, active: !!r.active };
   });
   assert.ok(worker.active);
+  const cachedApi = await page.evaluate(async () => {
+    for (const name of await caches.keys()) {
+      const cache = await caches.open(name);
+      if ((await cache.keys()).some(request => new URL(request.url).pathname.startsWith("/api/"))) return true;
+    }
+    return false;
+  });
+  assert.equal(cachedApi, false);
   assert.deepEqual(errors, []);
   console.log(
     "PASS production service worker registration, offline reload of visited pages, persistence and online reload",

@@ -44,6 +44,7 @@ const state = () =>
   page.evaluate(() => JSON.parse(localStorage.getItem("isp-manager-demo:v1")));
 const go = async (route) => {
   await page.goto(`${BASE}/#${route}`);
+  await page.locator(".sidebar").waitFor({ state: "attached" });
   await page.locator("main h1").waitFor();
 };
 const click = (name) => page.getByRole("button", { name, exact: true }).click();
@@ -240,11 +241,9 @@ try {
   await dialog().waitFor({ state: "hidden" });
   let pkg = (await state()).packages.find((x) => x.name === "باقة الفحص");
   assert.equal(pkg.price, null);
-  let pkgCard = page
-    .locator(".package-card")
-    .filter({
-      has: page.getByRole("heading", { name: "باقة الفحص", exact: true }),
-    });
+  let pkgCard = page.locator(".package-card").filter({
+    has: page.getByRole("heading", { name: "باقة الفحص", exact: true }),
+  });
   await pkgCard.getByRole("button", { name: "تعديل", exact: true }).click();
   await dialog()
     .getByLabel("السعر IQD (اختياري)", { exact: true })

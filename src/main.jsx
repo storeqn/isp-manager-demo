@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.jsx";
+import CloudGate from "./components/CloudGate.jsx";
 import "./styles.css";
 class ErrorBoundary extends Component {
   state = { failed: false };
@@ -24,7 +24,7 @@ class ErrorBoundary extends Component {
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <App />
+      <CloudGate />
     </ErrorBoundary>
   </React.StrictMode>,
 );

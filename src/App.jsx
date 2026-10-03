@@ -34,7 +34,7 @@ const currentRoute = () => {
     ? hash
     : "dashboard";
 };
-export default function App() {
+export default function App({ cloud = false, onLogout }) {
   const data = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const [route, setRoute] = useState(currentRoute);
   const [menu, setMenu] = useState(false);
@@ -70,20 +70,20 @@ export default function App() {
     return () => clearTimeout(id);
   }, [toast]);
   useEffect(() => {
-    const sync = () => {
+    const sync = async () => {
       if (!document.hidden)
         try {
-          store.sync();
+          await store.sync();
         } catch (e) {
           notify(e.message, "error");
         }
     };
     const id = setInterval(sync, 30000);
     document.addEventListener("visibilitychange", sync);
-    const storage = (e) => {
+    const storage = async (e) => {
       if (e.key === "isp-manager-demo:v1")
         try {
-          store.reload();
+          await store.reload();
         } catch (e) {
           notify(e.message, "error");
         }
@@ -106,8 +106,8 @@ export default function App() {
       document.body.classList.remove("menu-open");
     };
   }, [menu]);
-  const restore = (parsed) => {
-    store.restore(parsed);
+  const restore = async (parsed) => {
+    await store.restore(parsed);
     setStartupError("");
   };
   if (!data || startupError)
@@ -132,7 +132,7 @@ export default function App() {
                     `استبدال البيانات التالفة بنسخة تحتوي على ${parsed.subscribers.length} مشترك؟`,
                   )
                 )
-                  restore(parsed);
+                  await restore(parsed);
               } catch (e) {
                 setStartupError(e.message);
               }
@@ -216,7 +216,9 @@ export default function App() {
         <div className="sidebar-bottom">
           <div className="demo-info">
             <Icon name="shield" />
-            <strong>نسخة تجريبية محلية</strong>
+            <strong>
+              {cloud ? "نسخة تجريبية مشتركة" : "نسخة تجريبية محلية"}
+            </strong>
             <p>
               استكشف النظام ببيانات تجريبية.
               <br />
@@ -259,7 +261,7 @@ export default function App() {
           </div>
           <div className="topbar-actions">
             <span className="local-badge">
-              <span className="dot" /> حفظ محلي
+              <span className="dot" /> {cloud ? "حفظ سحابي" : "حفظ محلي"}
             </span>
             <button
               className="bell-btn icon-btn"
@@ -269,6 +271,19 @@ export default function App() {
               <Icon name="bell" />
               {unread > 0 && <span>{unread > 99 ? "99+" : unread}</span>}
             </button>
+            {cloud && (
+              <Button
+                onClick={async () => {
+                  try {
+                    await onLogout();
+                  } catch (e) {
+                    notify(e.message, "error");
+                  }
+                }}
+              >
+                خروج
+              </Button>
+            )}
             <span className="topbar-avatar">م</span>
           </div>
         </header>
@@ -354,8 +369,7 @@ export default function App() {
               قائمة المتصفح.
             </p>
             <p className="hint">
-              يتطلب النشر عبر HTTPS. بيانات التجربة تبقى في المتصفح والجهاز
-              المستخدمين.
+              {cloud ? "يتطلب HTTPS. سجّل الدخول بالكلمة نفسها للوصول إلى البيانات المشتركة على أجهزتك." : "يتطلب HTTPS. بيانات النسخة المحلية خاصة بالمتصفح والجهاز المستخدمين."}
             </p>
           </div>
           <Button variant="primary" onClick={() => setInstall(false)}>

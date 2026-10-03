@@ -42,10 +42,10 @@ export default function SubscriberForm({
   } catch {
     /* form preview remains empty until valid */
   }
-  const save = (e) => {
+  const save = async (e) => {
     e.preventDefault();
     try {
-      mutate((d) => subscriberService.save(d, form));
+      await mutate((d) => subscriberService.save(d, form));
       notify(subscriber ? "تم حفظ التعديلات" : "تم إضافة المشترك بنجاح");
       onClose();
     } catch (e) {
@@ -58,7 +58,9 @@ export default function SubscriberForm({
       onClose={onClose}
       wide
     >
-      <p className="modal-subtitle">بيانات تجريبية محفوظة على هذا الجهاز</p>
+      <p className="modal-subtitle">
+        بيانات تجريبية؛ يتم تأكيد الحفظ قبل إغلاق النموذج
+      </p>
       <form onSubmit={save} noValidate>
         <div className="form-grid">
           <Input

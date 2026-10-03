@@ -1,6 +1,6 @@
 // Network first for every same-origin GET; the network always wins on deployments.
 // Old caches are removed at activation. Hashed Vite assets avoid stale bundle reuse.
-const CACHE = "isp-manager-demo-v1";
+const CACHE = "isp-manager-demo-v2";
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
 });
@@ -17,6 +17,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (
     event.request.method !== "GET" ||
+    new URL(event.request.url).pathname.startsWith("/api/") ||
     new URL(event.request.url).origin !== self.location.origin
   )
     return;
